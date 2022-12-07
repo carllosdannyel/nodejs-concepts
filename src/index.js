@@ -10,6 +10,10 @@ app.use(express.json());
 
 const users = [];
 
+function findUser(array, name, username) {
+  return array.find((user) => user.name === name && user.username === username)
+}
+
 function checksExistsUserAccount(request, response, next) {
   // Complete aqui
 }
@@ -17,13 +21,14 @@ function checksExistsUserAccount(request, response, next) {
 app.post("/users", (request, response) => {
   const { name, username } = request.body;
 
-  const userExist = users.some((user) => user.username === username);
-  if (userExist) {
-    return response.status(400).json({ error: "User already exists!" });
-  }
+  const userExist = findUser(users, name, username)
+  if (userExist) return response.status(400).json({ error: "User already exists!" });
 
-  const user = { id: uuidv4(), name, username, todos: [] };
-  users.push(user);
+  const newUser = { id: uuidv4(), name, username, todos: [] };
+  users.push(newUser);
+
+  const user = findUser(users, name, username)
+  if (!user) return response.status(500).json({ error: "Internal error" });
 
   response.status(201).json(user);
 });
